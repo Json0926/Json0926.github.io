@@ -88,6 +88,7 @@
 
 
 <link rel="stylesheet" href="/css/style.css">
+
 </head>
 <body class="is-3-column">
     <nav class="navbar navbar-main">
@@ -240,23 +241,20 @@
     <div class="card-content">
         <h3 class="title is-5 has-text-weight-normal">Comments</h3>
         
+<div id="valine-thread" class="content"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
 <script>
-    var disqus_config = function () {
-        this.page.url = 'http://www.unjson.com/2019/08/28/test-my-site/';
-        this.page.identifier = '2019/08/28/test-my-site/';
-    };
-    (function() {
-        var d = document, s = d.createElement('script');  
-        s.src = '//' + '不能为空' + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
+    new Valine({
+        el: '#valine-thread' ,
+        notify: false,
+        verify: false,
+        app_id: 'sEt6JNeb1X0NTwKS3y7ag3s6-gzGzoHsz',
+        app_key: 'XUNwePuSRGrQRUKpOTnwAnMP',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!'
+    });
 </script>
 
-<div id="disqus_thread">
-    
-    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
     </div>
 </div>
 
@@ -375,6 +373,7 @@
         
     </div>
 </div>
+
     
         
     
