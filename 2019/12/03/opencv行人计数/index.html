@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<script src="/js/click.js"></script>
+<html  lang="en">  
+<head>
+    <script src="/js/clicklove.js"></script>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>OpenCV行人计数 - 金大大</title>
+
+
+    <meta name="description" content="在本教程中，您将学习如何使用OpenCV和Python构建“人员计数器”。使用OpenCV，我们可以实时计算“进出”百货商店的人数。 python-opencv行人计数在博客的第一部分，我们将讨论构建行人计数需要的python包。在此，我将简要讨论对象检测和对象跟踪之间的区别，以及我们如何利用两者来创建更准确的人员计数器。 然后，我们将检查项目的目录结构，然后实施整个人员计数项目。 最后，我们将研">
+<meta name="keywords" content="Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenCV行人计数">
+<meta property="og:url" content="http://www.unjson.com/2019/12/03/opencv行人计数/index.html">
+<meta property="og:site_name" content="金大大">
+<meta property="og:description" content="在本教程中，您将学习如何使用OpenCV和Python构建“人员计数器”。使用OpenCV，我们可以实时计算“进出”百货商店的人数。 python-opencv行人计数在博客的第一部分，我们将讨论构建行人计数需要的python包。在此，我将简要讨论对象检测和对象跟踪之间的区别，以及我们如何利用两者来创建更准确的人员计数器。 然后，我们将检查项目的目录结构，然后实施整个人员计数项目。 最后，我们将研">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://www.unjson.com/images/og_image.png">
+<meta property="og:updated_time" content="2019-12-12T12:24:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenCV行人计数">
+<meta name="twitter:description" content="在本教程中，您将学习如何使用OpenCV和Python构建“人员计数器”。使用OpenCV，我们可以实时计算“进出”百货商店的人数。 python-opencv行人计数在博客的第一部分，我们将讨论构建行人计数需要的python包。在此，我将简要讨论对象检测和对象跟踪之间的区别，以及我们如何利用两者来创建更准确的人员计数器。 然后，我们将检查项目的目录结构，然后实施整个人员计数项目。 最后，我们将研">
+<meta name="twitter:image" content="http://www.unjson.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="https://s2.ax1x.com/2019/09/06/nKmgwd.jpg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+        <script async="" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="https://s2.ax1x.com/2019/09/06/nKmgwd.jpg" alt="OpenCV行人计数" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">Home</a>
+                
+                <a class="navbar-item"
+                href="/archives">Archives</a>
+                
+                <a class="navbar-item"
+                href="/categories">Categories</a>
+                
+                <a class="navbar-item"
+                href="/tags">Tags</a>
+                
+                <a class="navbar-item"
+                href="/about">About</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="My GitHub" href="https://github.com/Json0926">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="Search" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2019-12-02T16:00:00.000Z">2019-12-03</time>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    22 minutes read (About 3326 words)
+                </span>
+                
+                
+                <span class="level-item has-text-grey" id="busuanzi_container_page_pv">
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv">0</span> visits
+                </span>
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                OpenCV行人计数
+            
+        </h1>
+        <div class="content">
+            <p>在本教程中，您将学习如何使用OpenCV和Python构建“人员计数器”。使用OpenCV，我们可以实时计算“进出”百货商店的人数。</p>
+<h3 id="python-opencv行人计数"><a href="#python-opencv行人计数" class="headerlink" title="python-opencv行人计数"></a>python-opencv行人计数</h3><p>在博客的第一部分，我们将讨论构建行人计数需要的python包。在此，我将简要讨论对象检测和对象跟踪之间的区别，以及我们如何利用两者来创建更准确的人员计数器。 然后，我们将检查项目的目录结构，然后实施整个人员计数项目。 最后，我们将研究将使用OpenCV计数的人数应用于实际视频的结果。</p>
+<a id="more"></a>
+
+<h3 id="行人计数需要的Python包"><a href="#行人计数需要的Python包" class="headerlink" title="行人计数需要的Python包"></a>行人计数需要的Python包</h3><p>为了构建行人计数程序，我们需要一些Python库，包括：</p>
+<ul>
+<li>Numpy</li>
+<li>OpenCV</li>
+<li>dlib</li>
+<li>imutils</li>
+</ul>
+<h3 id="理解目标检测与目标跟踪"><a href="#理解目标检测与目标跟踪" class="headerlink" title="理解目标检测与目标跟踪"></a>理解目标检测与目标跟踪</h3><p>在我们继续本教程的其余部分前，您必须对目标检测和目标跟踪的不同有一个基本的了解。</p>
+<p>应用对象检测时，我们要确定对象在图像/帧中的位置。与物体跟踪算法相比，物体检测器通常在计算上也更昂贵，因此更慢。对象检测算法的示例包括Haar级联，HOG +线性SVM，以及基于深度学习的对象检测器，例如Faster R-CNN，YOLO和单发检测器（SSD）。</p>
+<p>另一方面，对象跟踪器将接受对象在图像中的位置的输入（x，y）坐标，并且：</p>
+<ol>
+<li>为该特定对象分配唯一的ID</li>
+<li>跟踪对象在视频流中的移动情况，根据帧的各种属性（渐变，光流等）预测下一帧中的新对象位置</li>
+</ol>
+<h3 id="目标检测和目标跟踪的结合"><a href="#目标检测和目标跟踪的结合" class="headerlink" title="目标检测和目标跟踪的结合"></a>目标检测和目标跟踪的结合</h3><p>高度精确的对象跟踪器会将对象检测和对象跟踪的概念组合为一个算法，通常分为两个阶段：</p>
+<ul>
+<li>第一阶段-检测：在检测阶段，我们将运行计算上更昂贵的对象跟踪器，以（1）检测是否有新对象进入我们的视图，以及（2）查看是否可以找到在跟踪阶段“丢失”的对象。对于每个检测到的对象，我们使用新的边界框坐标创建或更新对象跟踪器。由于我们的目标检测器在计算上更加昂贵，因此我们每N帧只运行一次此阶段。</li>
+<li>第二阶段-追踪：当我们不处于“检测”阶段时，我们处于“跟踪”阶段。对于我们检测到的每个对象，我们创建一个对象跟踪器以跟踪对象在框架中移动时的情况。我们的对象跟踪器应该比对象检测器更快，更高效。我们将继续跟踪，直到到达第N帧，然后重新运行对象检测器。然后重复整个过程。</li>
+</ul>
+<p>这种混合方法的好处是，我们可以应用高精度的对象检测方法，而无需承担太多的计算负担。我们将实现这样的跟踪系统来建立我们的行人计数。</p>
+<h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><p>最重要的两个项目目录：</p>
+<ol>
+<li>pyimagesearch/：这个模块包含重心跟踪算法。</li>
+<li>mobilenet_ssd/：包含Caffe深度学习模型文件。我们将使用MobileNet单发检测器（SSD）</li>
+</ol>
+<h3 id="结合目标跟踪算法"><a href="#结合目标跟踪算法" class="headerlink" title="结合目标跟踪算法"></a>结合目标跟踪算法</h3><p>为了实现我们的行人计数器，我们将同时使用OpenCV和dlib。我们将OpenCV用于标准的计算机视觉/图像处理功能，并将深度学习对象检测器用于人员计数。然后，我们将使用dlib来实现相关性过滤器。我们也可以在这里使用OpenCV。但是，对于该项目，使用dlib对象跟踪实现要容易一些。</p>
+<p>下面简述一下质心跟踪算法：</p>
+<p>在步骤1，我们接受一组边界框并计算其对应的质心，边界框本身可以通过以下任一方式提供：</p>
+<ol>
+<li>对象检测器（例如HOG +线性SVM，Faster R-CNN，SSD等）</li>
+<li>或对象跟踪器（例如相关过滤器）</li>
+</ol>
+<p>在上图中，您可以看到在此算法的初始迭代中要跟踪两个对象。</p>
+<p>在步骤2中，我们计算任何新质心和现有质心之间的欧氏距离：</p>
+<p>质心跟踪算法假设，成对的质心之间的最小欧氏距离必须是相同的对象ID。 在上面的示例图像中，我们有两个现有的质心（紫色）和三个新的质心（黄色），这意味着已检测到新对象（因为相对于旧的质心还有一个新的质心）。 然后，箭头代表计算所有紫色质心和所有黄色质心之间的欧几里得距离。</p>
+<p>有了欧氏距离后，我们尝试在步骤3中关联对象ID：</p>
+<p>在图4中，您可以看到我们的质心跟踪器选择了关联以最小化其各自的欧几里得距离的质心。 但是左下角的点呢？ 它没有任何关联-我们该怎么办？</p>
+<p>要回答这个问题，我们需要执行步骤4，注册新对象：</p>
+<p>注册只是意味着我们可以通过以下方式将新对象添加到跟踪对象列表中：</p>
+<ol>
+<li>为他分配一个新的对象ID</li>
+<li>存储新对象边界框坐标的质心</li>
+</ol>
+<p>如果物体丢失或离开视野，我们可以简单地注销该物体（步骤5）。 确切地说，当对象“丢失”或“不再可见”时，您如何处理取决于您的确切应用，但是对于我们的人员计数器，当人员ID在连续40帧中无法与任何现有人员对象匹配时，我们将注销人员ID 。 同样，这只是质心跟踪算法的简要概述。</p>
+<h3 id="创建一个可跟踪对象"><a href="#创建一个可跟踪对象" class="headerlink" title="创建一个可跟踪对象"></a>创建一个可跟踪对象</h3><p>为了跟踪和计数视频流中的对象，我们需要一种简单的方法来存储有关对象本身的信息，包括：</p>
+<ul>
+<li>一个对象ID</li>
+<li>它是先前的质心（因此我们可以轻松计算对象移动的方向）</li>
+<li>对象是否已经被计数</li>
+</ul>
+<p>为了实现所有这些目标，我们能定义一个TrackableObject实例，打开trackableobject.py 并插入以下代码：</p>
+<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TrackableObject</span>:</span></span><br><span class="line">	<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, objectID, centroid)</span>:</span></span><br><span class="line">		<span class="hljs-comment"># store the object ID, then initialize a list of centroids</span></span><br><span class="line">		<span class="hljs-comment"># using the current centroid</span></span><br><span class="line">		self.objectID = objectID</span><br><span class="line">		self.centroids = [centroid]</span><br><span class="line"> </span><br><span class="line">		<span class="hljs-comment"># initialize a boolean used to indicate if the object has</span></span><br><span class="line">		<span class="hljs-comment"># already been counted or not</span></span><br><span class="line">		self.counted = <span class="hljs-literal">False</span></span><br></pre></td></tr></table></figure>
+
+<p>构造函数TrackableObject接收一个objectID和centroid并存储他们。质心变量是一个list因为它需要包含一个对象质心的历史位置。</p>
+<p>这个构造函数也吧counter初始化为False，指示尚未计算对象。</p>
+<h3 id="用OpenCV-Python实现我们的行人计数"><a href="#用OpenCV-Python实现我们的行人计数" class="headerlink" title="用OpenCV+Python实现我们的行人计数"></a>用OpenCV+Python实现我们的行人计数</h3><p>有了我们所有支持的Python帮助工具和类之后，我们现在就可以构建我们的OpenCV人员计数器了。</p>
+<figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment"># USAGE</span></span><br><span class="line"><span class="hljs-comment"># To read and write back out to video:</span></span><br><span class="line"><span class="hljs-comment"># python people_counter.py --prototxt mobilenet_ssd/MobileNetSSD_deploy.prototxt \</span></span><br><span class="line"><span class="hljs-comment">#	--model mobilenet_ssd/MobileNetSSD_deploy.caffemodel --input videos/example_01.mp4 \</span></span><br><span class="line"><span class="hljs-comment">#	--output output/output_01.avi</span></span><br><span class="line"><span class="hljs-comment">#</span></span><br><span class="line"><span class="hljs-comment"># To read from webcam and write back out to disk:</span></span><br><span class="line"><span class="hljs-comment"># python people_counter.py --prototxt mobilenet_ssd/MobileNetSSD_deploy.prototxt \</span></span><br><span class="line"><span class="hljs-comment">#	--model mobilenet_ssd/MobileNetSSD_deploy.caffemodel \</span></span><br><span class="line"><span class="hljs-comment">#	--output output/webcam_output.avi</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># import the necessary packages</span></span><br><span class="line"><span class="hljs-keyword">from</span> pyimagesearch.centroidtracker <span class="hljs-keyword">import</span> CentroidTracker</span><br><span class="line"><span class="hljs-keyword">from</span> pyimagesearch.trackableobject <span class="hljs-keyword">import</span> TrackableObject</span><br><span class="line"><span class="hljs-keyword">from</span> imutils.video <span class="hljs-keyword">import</span> VideoStream</span><br><span class="line"><span class="hljs-keyword">from</span> imutils.video <span class="hljs-keyword">import</span> FPS</span><br><span class="line"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np</span><br><span class="line"><span class="hljs-keyword">import</span> argparse</span><br><span class="line"><span class="hljs-keyword">import</span> imutils</span><br><span class="line"><span class="hljs-keyword">import</span> time</span><br><span class="line"><span class="hljs-keyword">import</span> dlib</span><br><span class="line"><span class="hljs-keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># construct the argument parse and parse the arguments</span></span><br><span class="line">ap = argparse.ArgumentParser()</span><br><span class="line">ap.add_argument(<span class="hljs-string">"-p"</span>, <span class="hljs-string">"--prototxt"</span>, required=<span class="hljs-literal">True</span>,</span><br><span class="line">	help=<span class="hljs-string">"path to Caffe 'deploy' prototxt file"</span>)</span><br><span class="line">ap.add_argument(<span class="hljs-string">"-m"</span>, <span class="hljs-string">"--model"</span>, required=<span class="hljs-literal">True</span>,</span><br><span class="line">	help=<span class="hljs-string">"path to Caffe pre-trained model"</span>)</span><br><span class="line">ap.add_argument(<span class="hljs-string">"-i"</span>, <span class="hljs-string">"--input"</span>, type=str,</span><br><span class="line">	help=<span class="hljs-string">"path to optional input video file"</span>)</span><br><span class="line">ap.add_argument(<span class="hljs-string">"-o"</span>, <span class="hljs-string">"--output"</span>, type=str,</span><br><span class="line">	help=<span class="hljs-string">"path to optional output video file"</span>)</span><br><span class="line">ap.add_argument(<span class="hljs-string">"-c"</span>, <span class="hljs-string">"--confidence"</span>, type=float, default=<span class="hljs-number">0.4</span>,</span><br><span class="line">	help=<span class="hljs-string">"minimum probability to filter weak detections"</span>)</span><br><span class="line">ap.add_argument(<span class="hljs-string">"-s"</span>, <span class="hljs-string">"--skip-frames"</span>, type=int, default=<span class="hljs-number">30</span>,</span><br><span class="line">	help=<span class="hljs-string">"# of skip frames between detections"</span>)</span><br><span class="line">args = vars(ap.parse_args())</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># initialize the list of class labels MobileNet SSD was trained to</span></span><br><span class="line"><span class="hljs-comment"># detect</span></span><br><span class="line">CLASSES = [<span class="hljs-string">"background"</span>, <span class="hljs-string">"aeroplane"</span>, <span class="hljs-string">"bicycle"</span>, <span class="hljs-string">"bird"</span>, <span class="hljs-string">"boat"</span>,</span><br><span class="line">	<span class="hljs-string">"bottle"</span>, <span class="hljs-string">"bus"</span>, <span class="hljs-string">"car"</span>, <span class="hljs-string">"cat"</span>, <span class="hljs-string">"chair"</span>, <span class="hljs-string">"cow"</span>, <span class="hljs-string">"diningtable"</span>,</span><br><span class="line">	<span class="hljs-string">"dog"</span>, <span class="hljs-string">"horse"</span>, <span class="hljs-string">"motorbike"</span>, <span class="hljs-string">"person"</span>, <span class="hljs-string">"pottedplant"</span>, <span class="hljs-string">"sheep"</span>,</span><br><span class="line">	<span class="hljs-string">"sofa"</span>, <span class="hljs-string">"train"</span>, <span class="hljs-string">"tvmonitor"</span>]</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># load our serialized model from disk</span></span><br><span class="line">print(<span class="hljs-string">"[INFO] loading model..."</span>)</span><br><span class="line">net = cv2.dnn.readNetFromCaffe(args[<span class="hljs-string">"prototxt"</span>], args[<span class="hljs-string">"model"</span>])</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># if a video path was not supplied, grab a reference to the webcam</span></span><br><span class="line"><span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> args.get(<span class="hljs-string">"input"</span>, <span class="hljs-literal">False</span>):</span><br><span class="line">	print(<span class="hljs-string">"[INFO] starting video stream..."</span>)</span><br><span class="line">	vs = VideoStream(src=<span class="hljs-number">0</span>).start()</span><br><span class="line">	time.sleep(<span class="hljs-number">2.0</span>)</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># otherwise, grab a reference to the video file</span></span><br><span class="line"><span class="hljs-keyword">else</span>:</span><br><span class="line">	print(<span class="hljs-string">"[INFO] opening video file..."</span>)</span><br><span class="line">	vs = cv2.VideoCapture(args[<span class="hljs-string">"input"</span>])</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># initialize the video writer (we'll instantiate later if need be)</span></span><br><span class="line">writer = <span class="hljs-literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># initialize the frame dimensions (we'll set them as soon as we read</span></span><br><span class="line"><span class="hljs-comment"># the first frame from the video)</span></span><br><span class="line">W = <span class="hljs-literal">None</span></span><br><span class="line">H = <span class="hljs-literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># instantiate our centroid tracker, then initialize a list to store</span></span><br><span class="line"><span class="hljs-comment"># each of our dlib correlation trackers, followed by a dictionary to</span></span><br><span class="line"><span class="hljs-comment"># map each unique object ID to a TrackableObject</span></span><br><span class="line">ct = CentroidTracker(maxDisappeared=<span class="hljs-number">40</span>, maxDistance=<span class="hljs-number">50</span>)</span><br><span class="line">trackers = []</span><br><span class="line">trackableObjects = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># initialize the total number of frames processed thus far, along</span></span><br><span class="line"><span class="hljs-comment"># with the total number of objects that have moved either up or down</span></span><br><span class="line">totalFrames = <span class="hljs-number">0</span></span><br><span class="line">totalDown = <span class="hljs-number">0</span></span><br><span class="line">totalUp = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># start the frames per second throughput estimator</span></span><br><span class="line">fps = FPS().start()</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># loop over frames from the video stream</span></span><br><span class="line"><span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:</span><br><span class="line">	<span class="hljs-comment"># grab the next frame and handle if we are reading from either</span></span><br><span class="line">	<span class="hljs-comment"># VideoCapture or VideoStream</span></span><br><span class="line">	frame = vs.read()</span><br><span class="line">	frame = frame[<span class="hljs-number">1</span>] <span class="hljs-keyword">if</span> args.get(<span class="hljs-string">"input"</span>, <span class="hljs-literal">False</span>) <span class="hljs-keyword">else</span> frame</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># if we are viewing a video and we did not grab a frame then we</span></span><br><span class="line">	<span class="hljs-comment"># have reached the end of the video</span></span><br><span class="line">	<span class="hljs-keyword">if</span> args[<span class="hljs-string">"input"</span>] <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> frame <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:</span><br><span class="line">		<span class="hljs-keyword">break</span></span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># resize the frame to have a maximum width of 500 pixels (the</span></span><br><span class="line">	<span class="hljs-comment"># less data we have, the faster we can process it), then convert</span></span><br><span class="line">	<span class="hljs-comment"># the frame from BGR to RGB for dlib</span></span><br><span class="line">	frame = imutils.resize(frame, width=<span class="hljs-number">500</span>)</span><br><span class="line">	rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># if the frame dimensions are empty, set them</span></span><br><span class="line">	<span class="hljs-keyword">if</span> W <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> H <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:</span><br><span class="line">		(H, W) = frame.shape[:<span class="hljs-number">2</span>]</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># if we are supposed to be writing a video to disk, initialize</span></span><br><span class="line">	<span class="hljs-comment"># the writer</span></span><br><span class="line">	<span class="hljs-keyword">if</span> args[<span class="hljs-string">"output"</span>] <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> writer <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:</span><br><span class="line">		fourcc = cv2.VideoWriter_fourcc(*<span class="hljs-string">"MJPG"</span>)</span><br><span class="line">		writer = cv2.VideoWriter(args[<span class="hljs-string">"output"</span>], fourcc, <span class="hljs-number">30</span>,</span><br><span class="line">			(W, H), <span class="hljs-literal">True</span>)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># initialize the current status along with our list of bounding</span></span><br><span class="line">	<span class="hljs-comment"># box rectangles returned by either (1) our object detector or</span></span><br><span class="line">	<span class="hljs-comment"># (2) the correlation trackers</span></span><br><span class="line">	status = <span class="hljs-string">"Waiting"</span></span><br><span class="line">	rects = []</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># check to see if we should run a more computationally expensive</span></span><br><span class="line">	<span class="hljs-comment"># object detection method to aid our tracker</span></span><br><span class="line">	<span class="hljs-keyword">if</span> totalFrames % args[<span class="hljs-string">"skip_frames"</span>] == <span class="hljs-number">0</span>:</span><br><span class="line">		<span class="hljs-comment"># set the status and initialize our new set of object trackers</span></span><br><span class="line">		status = <span class="hljs-string">"Detecting"</span></span><br><span class="line">		trackers = []</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># convert the frame to a blob and pass the blob through the</span></span><br><span class="line">		<span class="hljs-comment"># network and obtain the detections</span></span><br><span class="line">		blob = cv2.dnn.blobFromImage(frame, <span class="hljs-number">0.007843</span>, (W, H), <span class="hljs-number">127.5</span>)</span><br><span class="line">		net.setInput(blob)</span><br><span class="line">		detections = net.forward()</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># loop over the detections</span></span><br><span class="line">		<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> np.arange(<span class="hljs-number">0</span>, detections.shape[<span class="hljs-number">2</span>]):</span><br><span class="line">			<span class="hljs-comment"># extract the confidence (i.e., probability) associated</span></span><br><span class="line">			<span class="hljs-comment"># with the prediction</span></span><br><span class="line">			confidence = detections[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, i, <span class="hljs-number">2</span>]</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># filter out weak detections by requiring a minimum</span></span><br><span class="line">			<span class="hljs-comment"># confidence</span></span><br><span class="line">			<span class="hljs-keyword">if</span> confidence &gt; args[<span class="hljs-string">"confidence"</span>]:</span><br><span class="line">				<span class="hljs-comment"># extract the index of the class label from the</span></span><br><span class="line">				<span class="hljs-comment"># detections list</span></span><br><span class="line">				idx = int(detections[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, i, <span class="hljs-number">1</span>])</span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># if the class label is not a person, ignore it</span></span><br><span class="line">				<span class="hljs-keyword">if</span> CLASSES[idx] != <span class="hljs-string">"person"</span>:</span><br><span class="line">					<span class="hljs-keyword">continue</span></span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># compute the (x, y)-coordinates of the bounding box</span></span><br><span class="line">				<span class="hljs-comment"># for the object</span></span><br><span class="line">				box = detections[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, i, <span class="hljs-number">3</span>:<span class="hljs-number">7</span>] * np.array([W, H, W, H])</span><br><span class="line">				(startX, startY, endX, endY) = box.astype(<span class="hljs-string">"int"</span>)</span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># construct a dlib rectangle object from the bounding</span></span><br><span class="line">				<span class="hljs-comment"># box coordinates and then start the dlib correlation</span></span><br><span class="line">				<span class="hljs-comment"># tracker</span></span><br><span class="line">				tracker = dlib.correlation_tracker()</span><br><span class="line">				rect = dlib.rectangle(startX, startY, endX, endY)</span><br><span class="line">				tracker.start_track(rgb, rect)</span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># add the tracker to our list of trackers so we can</span></span><br><span class="line">				<span class="hljs-comment"># utilize it during skip frames</span></span><br><span class="line">				trackers.append(tracker)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># otherwise, we should utilize our object *trackers* rather than</span></span><br><span class="line">	<span class="hljs-comment"># object *detectors* to obtain a higher frame processing throughput</span></span><br><span class="line">	<span class="hljs-keyword">else</span>:</span><br><span class="line">		<span class="hljs-comment"># loop over the trackers</span></span><br><span class="line">		<span class="hljs-keyword">for</span> tracker <span class="hljs-keyword">in</span> trackers:</span><br><span class="line">			<span class="hljs-comment"># set the status of our system to be 'tracking' rather</span></span><br><span class="line">			<span class="hljs-comment"># than 'waiting' or 'detecting'</span></span><br><span class="line">			status = <span class="hljs-string">"Tracking"</span></span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># update the tracker and grab the updated position</span></span><br><span class="line">			tracker.update(rgb)</span><br><span class="line">			pos = tracker.get_position()</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># unpack the position object</span></span><br><span class="line">			startX = int(pos.left())</span><br><span class="line">			startY = int(pos.top())</span><br><span class="line">			endX = int(pos.right())</span><br><span class="line">			endY = int(pos.bottom())</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># add the bounding box coordinates to the rectangles list</span></span><br><span class="line">			rects.append((startX, startY, endX, endY))</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># draw a horizontal line in the center of the frame -- once an</span></span><br><span class="line">	<span class="hljs-comment"># object crosses this line we will determine whether they were</span></span><br><span class="line">	<span class="hljs-comment"># moving 'up' or 'down'</span></span><br><span class="line">	cv2.line(frame, (<span class="hljs-number">0</span>, H // <span class="hljs-number">2</span>), (W, H // <span class="hljs-number">2</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>), <span class="hljs-number">2</span>)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># use the centroid tracker to associate the (1) old object</span></span><br><span class="line">	<span class="hljs-comment"># centroids with (2) the newly computed object centroids</span></span><br><span class="line">	objects = ct.update(rects)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># loop over the tracked objects</span></span><br><span class="line">	<span class="hljs-keyword">for</span> (objectID, centroid) <span class="hljs-keyword">in</span> objects.items():</span><br><span class="line">		<span class="hljs-comment"># check to see if a trackable object exists for the current</span></span><br><span class="line">		<span class="hljs-comment"># object ID</span></span><br><span class="line">		to = trackableObjects.get(objectID, <span class="hljs-literal">None</span>)</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># if there is no existing trackable object, create one</span></span><br><span class="line">		<span class="hljs-keyword">if</span> to <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:</span><br><span class="line">			to = TrackableObject(objectID, centroid)</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># otherwise, there is a trackable object so we can utilize it</span></span><br><span class="line">		<span class="hljs-comment"># to determine direction</span></span><br><span class="line">		<span class="hljs-keyword">else</span>:</span><br><span class="line">			<span class="hljs-comment"># the difference between the y-coordinate of the *current*</span></span><br><span class="line">			<span class="hljs-comment"># centroid and the mean of *previous* centroids will tell</span></span><br><span class="line">			<span class="hljs-comment"># us in which direction the object is moving (negative for</span></span><br><span class="line">			<span class="hljs-comment"># 'up' and positive for 'down')</span></span><br><span class="line">			y = [c[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> to.centroids]</span><br><span class="line">			direction = centroid[<span class="hljs-number">1</span>] - np.mean(y)</span><br><span class="line">			to.centroids.append(centroid)</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># check to see if the object has been counted or not</span></span><br><span class="line">			<span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> to.counted:</span><br><span class="line">				<span class="hljs-comment"># if the direction is negative (indicating the object</span></span><br><span class="line">				<span class="hljs-comment"># is moving up) AND the centroid is above the center</span></span><br><span class="line">				<span class="hljs-comment"># line, count the object</span></span><br><span class="line">				<span class="hljs-keyword">if</span> direction &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> abs(centroid[<span class="hljs-number">1</span>] - H // <span class="hljs-number">2</span>) &lt; <span class="hljs-number">10</span>:</span><br><span class="line">					totalUp += <span class="hljs-number">1</span></span><br><span class="line">					to.counted = <span class="hljs-literal">True</span></span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># if the direction is positive (indicating the object</span></span><br><span class="line">				<span class="hljs-comment"># is moving down) AND the centroid is below the</span></span><br><span class="line">				<span class="hljs-comment"># center line, count the object</span></span><br><span class="line">				<span class="hljs-keyword">elif</span> direction &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> abs(centroid[<span class="hljs-number">1</span>] - H // <span class="hljs-number">2</span>) &lt; <span class="hljs-number">10</span>:</span><br><span class="line">					totalDown += <span class="hljs-number">1</span></span><br><span class="line">					to.counted = <span class="hljs-literal">True</span></span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># store the trackable object in our dictionary</span></span><br><span class="line">		trackableObjects[objectID] = to</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># draw both the ID of the object and the centroid of the</span></span><br><span class="line">		<span class="hljs-comment"># object on the output frame</span></span><br><span class="line">		text = <span class="hljs-string">"ID &#123;&#125;"</span>.format(objectID)</span><br><span class="line">		cv2.putText(frame, text, (centroid[<span class="hljs-number">0</span>] - <span class="hljs-number">10</span>, centroid[<span class="hljs-number">1</span>] - <span class="hljs-number">10</span>),</span><br><span class="line">			cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">0.5</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), <span class="hljs-number">2</span>)</span><br><span class="line">		cv2.circle(frame, (centroid[<span class="hljs-number">0</span>], centroid[<span class="hljs-number">1</span>]), <span class="hljs-number">4</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), <span class="hljs-number">-1</span>)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># construct a tuple of information we will be displaying on the</span></span><br><span class="line">	<span class="hljs-comment"># frame</span></span><br><span class="line">	info = [</span><br><span class="line">		(<span class="hljs-string">"Up"</span>, totalUp),</span><br><span class="line">		(<span class="hljs-string">"Down"</span>, totalDown),</span><br><span class="line">		(<span class="hljs-string">"Status"</span>, status),</span><br><span class="line">	]</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># loop over the info tuples and draw them on our frame</span></span><br><span class="line">	<span class="hljs-keyword">for</span> (i, (k, v)) <span class="hljs-keyword">in</span> enumerate(info):</span><br><span class="line">		text = <span class="hljs-string">"&#123;&#125;: &#123;&#125;"</span>.format(k, v)</span><br><span class="line">		cv2.putText(frame, text, (<span class="hljs-number">10</span>, H - ((i * <span class="hljs-number">20</span>) + <span class="hljs-number">20</span>)),</span><br><span class="line">			cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">0.6</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>), <span class="hljs-number">2</span>)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># check to see if we should write the frame to disk</span></span><br><span class="line">	<span class="hljs-keyword">if</span> writer <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:</span><br><span class="line">		writer.write(frame)</span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># show the output frame</span></span><br><span class="line">	cv2.imshow(<span class="hljs-string">"Frame"</span>, frame)</span><br><span class="line">	key = cv2.waitKey(<span class="hljs-number">1</span>) &amp; <span class="hljs-number">0xFF</span></span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># if the `q` key was pressed, break from the loop</span></span><br><span class="line">	<span class="hljs-keyword">if</span> key == ord(<span class="hljs-string">"q"</span>):</span><br><span class="line">		<span class="hljs-keyword">break</span></span><br><span class="line"></span><br><span class="line">	<span class="hljs-comment"># increment the total number of frames processed thus far and</span></span><br><span class="line">	<span class="hljs-comment"># then update the FPS counter</span></span><br><span class="line">	totalFrames += <span class="hljs-number">1</span></span><br><span class="line">	fps.update()</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># stop the timer and display FPS information</span></span><br><span class="line">fps.stop()</span><br><span class="line">print(<span class="hljs-string">"[INFO] elapsed time: &#123;:.2f&#125;"</span>.format(fps.elapsed()))</span><br><span class="line">print(<span class="hljs-string">"[INFO] approx. FPS: &#123;:.2f&#125;"</span>.format(fps.fps()))</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># check to see if we need to release the video writer pointer</span></span><br><span class="line"><span class="hljs-keyword">if</span> writer <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:</span><br><span class="line">	writer.release()</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># if we are not using a video file, stop the camera video stream</span></span><br><span class="line"><span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> args.get(<span class="hljs-string">"input"</span>, <span class="hljs-literal">False</span>):</span><br><span class="line">	vs.stop()</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># otherwise, release the video file pointer</span></span><br><span class="line"><span class="hljs-keyword">else</span>:</span><br><span class="line">	vs.release()</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment"># close any open windows</span></span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
+
+<p>需要源码扫描下方二维码公众号内回复。</p>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Machine-Learning/">Machine Learning</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        <div class="social-share"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css">
+<script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script>
+        
+
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="menu-label has-text-centered">Like this article? Support the author with</h3>
+        <div class="buttons is-centered">
+            
+                
+<a class="button is-info donate">
+    <span class="icon is-small">
+        <i class="fab fa-alipay"></i>
+    </span>
+    <span>Alipay</span>
+    <div class="qrcode"><img src="https://s2.ax1x.com/2019/09/06/nKMbvV.png" alt="Alipay"></div>
+</a>
+
+                
+                
+<a class="button is-success donate">
+    <span class="icon is-small">
+        <i class="fab fa-weixin"></i>
+    </span>
+    <span>Wechat</span>
+    <div class="qrcode"><img src="https://i.loli.net/2019/09/06/wDdYqNGRhtrJ7bA.jpg" alt="Wechat"></div>
+</a>
+
+                
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2019/12/04/开始一个机器学习项目需要知道的/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">在开始一个成功的机器学习项目之前要问的11个问题</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2019/10/12/厦门/">
+                <span class="level-item">厦门</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">Comments</h3>
+        
+<div id="valine-thread" class="content"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script>
+    new Valine({
+        el: '#valine-thread' ,
+        notify: false,
+        verify: false,
+        app_id: 'sEt6JNeb1X0NTwKS3y7ag3s6-gzGzoHsz',
+        app_key: 'XUNwePuSRGrQRUKpOTnwAnMP',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!'
+    });
+</script>
+
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                        <img class="image is-128x128 has-mb-6" src="https://s2.ax1x.com/2019/09/06/nKBNiq.jpg" alt="金大大">
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        金大大
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        程序猿 摄影师 爱健身 高颜值 都假的
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Shenzhen China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Posts
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        12
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Categories
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Tags
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        2
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/Json0926" target="_blank">
+                Follow</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Github" href="https://github.com/Json0926">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Facebook" href="https://facebook.com">
+                
+                <i class="fab fa-facebook"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Twitter" href="https://twitter.com">
+                
+                <i class="fab fa-twitter"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Weibo" href="https://weibo.com">
+                
+                <i class="fab fa-Weibo"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="RSS" href="/">
+                
+                <i class="fas fa-rss"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+
+    
+        
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Links
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://hexo.io" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Hexo</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">hexo.io</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Categories
+            </h3>
+            <ul class="menu-list">
+            
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Tag Cloud
+        </h3>
+        <a href="/tags/Machine-Learning/" style="font-size: 20px;">Machine Learning</a> <a href="/tags/Travel/" style="font-size: 10px;">Travel</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen is-sticky">
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Recent
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-09T06:53:06.514Z">2020-01-09</time></div>
+                    <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/01/08/Ubuntu18修改apt源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-08T02:24:37.858Z">2020-01-08</time></div>
+                    <a href="/2020/01/08/Ubuntu18修改apt源/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/10/OpenCV实现目标跟踪/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="OpenCV实现目标跟踪">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-09T16:00:00.000Z">2019-12-10</time></div>
+                    <a href="/2019/12/10/OpenCV实现目标跟踪/" class="title has-link-black-ter is-size-6 has-text-weight-normal">OpenCV实现目标跟踪</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/05/hello-world/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Hello World">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-05T06:51:53.000Z">2019-12-05</time></div>
+                    <a href="/2019/12/05/hello-world/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Hello World</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/04/图像识别工程大概步骤/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="图像识别工程步骤">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-04T06:28:57.000Z">2019-12-04</time></div>
+                    <a href="/2019/12/04/图像识别工程大概步骤/" class="title has-link-black-ter is-size-6 has-text-weight-normal">图像识别工程步骤</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Archives
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">January 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/12/">
+                <span class="level-start">
+                    <span class="level-item">December 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/10/">
+                <span class="level-start">
+                    <span class="level-item">October 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Tags
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Machine-Learning/">
+                        <span class="tag">Machine Learning</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Travel/">
+                        <span class="tag">Travel</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Recent
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-09T06:53:06.514Z">2020-01-09</time></div>
+                    <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/01/08/Ubuntu18修改apt源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-08T02:24:37.858Z">2020-01-08</time></div>
+                    <a href="/2020/01/08/Ubuntu18修改apt源/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/10/OpenCV实现目标跟踪/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="OpenCV实现目标跟踪">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-09T16:00:00.000Z">2019-12-10</time></div>
+                    <a href="/2019/12/10/OpenCV实现目标跟踪/" class="title has-link-black-ter is-size-6 has-text-weight-normal">OpenCV实现目标跟踪</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/05/hello-world/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Hello World">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-05T06:51:53.000Z">2019-12-05</time></div>
+                    <a href="/2019/12/05/hello-world/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Hello World</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/04/图像识别工程大概步骤/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="图像识别工程步骤">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-04T06:28:57.000Z">2019-12-04</time></div>
+                    <a href="/2019/12/04/图像识别工程大概步骤/" class="title has-link-black-ter is-size-6 has-text-weight-normal">图像识别工程步骤</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Archives
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">January 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/12/">
+                <span class="level-start">
+                    <span class="level-item">December 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/10/">
+                <span class="level-start">
+                    <span class="level-item">October 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Tags
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Machine-Learning/">
+                        <span class="tag">Machine Learning</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Travel/">
+                        <span class="tag">Travel</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    
+<footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="https://s2.ax1x.com/2019/09/06/nKmgwd.jpg" alt="OpenCV行人计数" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2020 Js&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                <br>
+                
+                </p>
+            </div>
+            <div class="center">
+              <script pjax async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+              <span id="busuanzi_container_page_pv">
+                    本站总访问量<span id="busuanzi_value_site_pv" style="display"></span>次
+              </span>
+              <span id="busuanzi_container_page_uv">
+                    本站访客数<span id="busuanzi_value_site_uv" style="display"></span>人次
+              </span>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("en");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+    
+    
+
+<a id="back-to-top" title="Back to Top" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="Type something..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>

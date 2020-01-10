@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<script src="/js/click.js"></script>
+<html  lang="en">  
+<head>
+    <script src="/js/clicklove.js"></script>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>OpenCV实现目标跟踪 - 金大大</title>
+
+
+    <meta name="description" content="本节内容是学习实现如何通过OpenCV实现质心跟踪，一个易于理解且高效的跟踪算法。 目标跟踪的过程：  进行一组初始的对象检测（例如边界框坐标的输入集） 为每一个初始检测对象创建一个唯一ID 然后跟踪每个对象在视频中的帧中移动时的情况，并保持唯一ID的分配  此外，目标跟踪允许我们将唯一的ID应用于每个被跟踪的对象，从而使我们能够对视频中的唯一对象进行计数。目标跟踪对于建立人员计数器至关重要。">
+<meta name="keywords" content="Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenCV实现目标跟踪">
+<meta property="og:url" content="http://www.unjson.com/2019/12/10/OpenCV实现目标跟踪/index.html">
+<meta property="og:site_name" content="金大大">
+<meta property="og:description" content="本节内容是学习实现如何通过OpenCV实现质心跟踪，一个易于理解且高效的跟踪算法。 目标跟踪的过程：  进行一组初始的对象检测（例如边界框坐标的输入集） 为每一个初始检测对象创建一个唯一ID 然后跟踪每个对象在视频中的帧中移动时的情况，并保持唯一ID的分配  此外，目标跟踪允许我们将唯一的ID应用于每个被跟踪的对象，从而使我们能够对视频中的唯一对象进行计数。目标跟踪对于建立人员计数器至关重要。">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://www.unjson.com/images/og_image.png">
+<meta property="og:updated_time" content="2019-12-12T12:24:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenCV实现目标跟踪">
+<meta name="twitter:description" content="本节内容是学习实现如何通过OpenCV实现质心跟踪，一个易于理解且高效的跟踪算法。 目标跟踪的过程：  进行一组初始的对象检测（例如边界框坐标的输入集） 为每一个初始检测对象创建一个唯一ID 然后跟踪每个对象在视频中的帧中移动时的情况，并保持唯一ID的分配  此外，目标跟踪允许我们将唯一的ID应用于每个被跟踪的对象，从而使我们能够对视频中的唯一对象进行计数。目标跟踪对于建立人员计数器至关重要。">
+<meta name="twitter:image" content="http://www.unjson.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="https://s2.ax1x.com/2019/09/06/nKmgwd.jpg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+        <script async="" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="https://s2.ax1x.com/2019/09/06/nKmgwd.jpg" alt="OpenCV实现目标跟踪" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">Home</a>
+                
+                <a class="navbar-item"
+                href="/archives">Archives</a>
+                
+                <a class="navbar-item"
+                href="/categories">Categories</a>
+                
+                <a class="navbar-item"
+                href="/tags">Tags</a>
+                
+                <a class="navbar-item"
+                href="/about">About</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="My GitHub" href="https://github.com/Json0926">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="Search" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2019-12-09T16:00:00.000Z">2019-12-10</time>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    15 minutes read (About 2293 words)
+                </span>
+                
+                
+                <span class="level-item has-text-grey" id="busuanzi_container_page_pv">
+                    <i class="far fa-eye"></i>
+                    <span id="busuanzi_value_page_pv">0</span> visits
+                </span>
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                OpenCV实现目标跟踪
+            
+        </h1>
+        <div class="content">
+            <p>本节内容是学习实现如何通过OpenCV实现质心跟踪，一个易于理解且高效的跟踪算法。</p>
+<p>目标跟踪的过程：</p>
+<ol>
+<li>进行一组初始的对象检测（例如边界框坐标的输入集）</li>
+<li>为每一个初始检测对象创建一个唯一ID</li>
+<li>然后跟踪每个对象在视频中的帧中移动时的情况，并保持唯一ID的分配</li>
+</ol>
+<p>此外，目标跟踪允许我们将唯一的ID应用于每个被跟踪的对象，从而使我们能够对视频中的唯一对象进行计数。目标跟踪对于建立人员计数器至关重要。</p>
+<a id="more"></a>
+
+<p>理想的目标跟踪算法将会：</p>
+<ul>
+<li>仅仅需要请求一次目标检测阶段</li>
+<li>将非常快-比运行实际的对象检测器本身快得多</li>
+<li>能够处理当被跟踪对象“消失”或移动到视频帧的边界之外</li>
+<li>抗遮挡能力强</li>
+<li>能够拾取帧之间丢失的目标</li>
+</ul>
+<p>对于任何计算机视觉和图像处理算法来说这都是一个很高的要求，并且我们可以发挥多种技巧来帮助提高我们的目标检测器。</p>
+<p>但是在我们构建一个鲁棒的方法之前，我们首先需要研究目标跟踪的基础。</p>
+<p>目标跟踪算法被叫做质心跟踪算法是因为它依赖于以下两者的欧式距离：</p>
+<ol>
+<li>已经存在的目标质心</li>
+<li>视频后续帧中的新目标质心</li>
+</ol>
+<p>我将实现一个包含质心追踪算法的Python类，并且创建一个脚本去导入视频并运行目标追踪器。</p>
+<p>最后，将运行目标检测器并检查结果，同时注意算法的优缺点。</p>
+<h4 id="质心跟踪算法"><a href="#质心跟踪算法" class="headerlink" title="质心跟踪算法"></a>质心跟踪算法</h4><p>质心跟踪算法是一个多步骤过程。下面回顾每一个跟踪步骤。</p>
+<h5 id="步骤1-接收边界框坐标并计算质心"><a href="#步骤1-接收边界框坐标并计算质心" class="headerlink" title="步骤1: 接收边界框坐标并计算质心"></a>步骤1: 接收边界框坐标并计算质心</h5><img src="https://www.pyimagesearch.com/wp-content/uploads/2018/07/simple_object_tracking_step1.png">
+
+<p>质心跟踪算法假设我们正在传递每个单帧中每个检测到的对象的一组边界框（x，y）坐标。</p>
+<p>这些边界框可以由您想要的任何类型的对象检测器生成（颜色阈值+轮廓提取，Haar级联，HOG +线性SVM，SSD，Faster R-CNN等），前提是要针对帧中的每个帧进行计算该视频。</p>
+<p>有了边界框坐标后，我们必须计算“质心”或更简单地计算边界框的中心坐标(x, y)。上图演示了接收一组边界框坐标并计算质心。</p>
+<p>由于这些是提供给我们算法的边界框的第一组初始集合，因此我们将为其分配唯一的ID。</p>
+<h5 id="步骤2-计算新边界框和存在目标的欧式距离"><a href="#步骤2-计算新边界框和存在目标的欧式距离" class="headerlink" title="步骤2 计算新边界框和存在目标的欧式距离"></a>步骤2 计算新边界框和存在目标的欧式距离</h5><img src="https://www.pyimagesearch.com/wp-content/uploads/2018/07/simple_object_tracking_step2.png">
+
+<p>对于视频流中的每个后续帧，我们应用计算对象质心的步骤1。但是，我们首先需要确定是否可以将新的对象质心（黄色）与旧的对象质心（紫色）相关联，而不是为每个检测到的对象分配新的唯一ID（这会破坏对象跟踪的目的）。为了完成此过程，我们计算了每对现有对象质心和输入对象质心之间的欧式距离（用绿色箭头突出显示）。</p>
+<p>从上图中你可以看到我们在图像中检测到三个物体。靠近的两对是两个存在的目标。</p>
+<p>然后，我们计算每对原始质心（黄色）和新质心（紫色）之间的欧式距离。但是，我们如何使用这些点之间的欧式距离来实际匹配它们并将它们关联起来呢？</p>
+<h5 id="步骤3：更新存在目标的-x-y-坐标"><a href="#步骤3：更新存在目标的-x-y-坐标" class="headerlink" title="步骤3：更新存在目标的(x, y)坐标"></a>步骤3：更新存在目标的(x, y)坐标</h5><img src="https://www.pyimagesearch.com/wp-content/uploads/2018/07/simple_object_tracking_step3.png">
+
+<p>质心跟踪算法的主要假设是，给定的对象可能会在后续帧之间移动，但是帧的质心之间的距离将小于对象之间的所有其他距离。</p>
+<p>因此，如果我们选择将质心与后续帧之间的最小距离相关联，则可以构建对象跟踪器。</p>
+<p>上图中，你可以看到质心追踪算法如何选择将最小化欧式距离的质心关联起来。</p>
+<p>但是左下角没有任何可以关联的点需要怎么办？</p>
+<h5 id="步骤4：注册新的目标"><a href="#步骤4：注册新的目标" class="headerlink" title="步骤4：注册新的目标"></a>步骤4：注册新的目标</h5><img src="https://www.pyimagesearch.com/wp-content/uploads/2018/07/simple_object_tracking_step4.png">
+
+<p>如果输入检测的数量多于被跟踪的现有对象，需要注册一个新目标。注册意味着需要添加一个新的对象到追踪列表中，通过：</p>
+<ol>
+<li>给它分配一个新的对象ID</li>
+<li>存储该对象的边界框坐标的质心</li>
+</ol>
+<p>现在回到步骤2对视频流中的每一帧重复步骤。</p>
+<p>上图演示了使用最小欧式距离来关联现有对象ID，然后注册一个新对象的过程。</p>
+<h5 id="步骤5：注销旧的目标"><a href="#步骤5：注销旧的目标" class="headerlink" title="步骤5：注销旧的目标"></a>步骤5：注销旧的目标</h5><p>任何合理的对象跟踪算法都必须能够处理对象丢失，消失或离开视野时的情况。实际情况下，如何处理这些情况实际上取决于对象跟踪器的部署位置，但是对于此实现，我们将在旧对象无法与任何现有对象匹配（总共N个后续帧）时注销旧对象。</p>
+<h4 id="目标跟踪项目结构"><a href="#目标跟踪项目结构" class="headerlink" title="目标跟踪项目结构"></a>目标跟踪项目结构</h4><figure class="highlight python hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment"># import the necessary packages</span></span><br><span class="line"><span class="hljs-keyword">from</span> scipy.spatial <span class="hljs-keyword">import</span> distance <span class="hljs-keyword">as</span> dist</span><br><span class="line"><span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> OrderedDict</span><br><span class="line"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CentroidTracker</span>:</span></span><br><span class="line">	<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, maxDisappeared=<span class="hljs-number">50</span>, maxDistance=<span class="hljs-number">50</span>)</span>:</span></span><br><span class="line">		<span class="hljs-comment"># initialize the next unique object ID along with two ordered</span></span><br><span class="line">		<span class="hljs-comment"># dictionaries used to keep track of mapping a given object</span></span><br><span class="line">		<span class="hljs-comment"># ID to its centroid and number of consecutive frames it has</span></span><br><span class="line">		<span class="hljs-comment"># been marked as "disappeared", respectively</span></span><br><span class="line">		self.nextObjectID = <span class="hljs-number">0</span></span><br><span class="line">		self.objects = OrderedDict()</span><br><span class="line">		self.disappeared = OrderedDict()</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># store the number of maximum consecutive frames a given</span></span><br><span class="line">		<span class="hljs-comment"># object is allowed to be marked as "disappeared" until we</span></span><br><span class="line">		<span class="hljs-comment"># need to deregister the object from tracking</span></span><br><span class="line">		self.maxDisappeared = maxDisappeared</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># store the maximum distance between centroids to associate</span></span><br><span class="line">		<span class="hljs-comment"># an object -- if the distance is larger than this maximum</span></span><br><span class="line">		<span class="hljs-comment"># distance we'll start to mark the object as "disappeared"</span></span><br><span class="line">		self.maxDistance = maxDistance</span><br><span class="line"></span><br><span class="line">	<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">register</span><span class="hljs-params">(self, centroid)</span>:</span></span><br><span class="line">		<span class="hljs-comment"># when registering an object we use the next available object</span></span><br><span class="line">		<span class="hljs-comment"># ID to store the centroid</span></span><br><span class="line">		self.objects[self.nextObjectID] = centroid</span><br><span class="line">		self.disappeared[self.nextObjectID] = <span class="hljs-number">0</span></span><br><span class="line">		self.nextObjectID += <span class="hljs-number">1</span></span><br><span class="line"></span><br><span class="line">	<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deregister</span><span class="hljs-params">(self, objectID)</span>:</span></span><br><span class="line">		<span class="hljs-comment"># to deregister an object ID we delete the object ID from</span></span><br><span class="line">		<span class="hljs-comment"># both of our respective dictionaries</span></span><br><span class="line">		<span class="hljs-keyword">del</span> self.objects[objectID]</span><br><span class="line">		<span class="hljs-keyword">del</span> self.disappeared[objectID]</span><br><span class="line"></span><br><span class="line">	<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">update</span><span class="hljs-params">(self, rects)</span>:</span></span><br><span class="line">		<span class="hljs-comment"># check to see if the list of input bounding box rectangles</span></span><br><span class="line">		<span class="hljs-comment"># is empty</span></span><br><span class="line">		<span class="hljs-keyword">if</span> len(rects) == <span class="hljs-number">0</span>:</span><br><span class="line">			<span class="hljs-comment"># loop over any existing tracked objects and mark them</span></span><br><span class="line">			<span class="hljs-comment"># as disappeared</span></span><br><span class="line">			<span class="hljs-keyword">for</span> objectID <span class="hljs-keyword">in</span> list(self.disappeared.keys()):</span><br><span class="line">				self.disappeared[objectID] += <span class="hljs-number">1</span></span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># if we have reached a maximum number of consecutive</span></span><br><span class="line">				<span class="hljs-comment"># frames where a given object has been marked as</span></span><br><span class="line">				<span class="hljs-comment"># missing, deregister it</span></span><br><span class="line">				<span class="hljs-keyword">if</span> self.disappeared[objectID] &gt; self.maxDisappeared:</span><br><span class="line">					self.deregister(objectID)</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># return early as there are no centroids or tracking info</span></span><br><span class="line">			<span class="hljs-comment"># to update</span></span><br><span class="line">			<span class="hljs-keyword">return</span> self.objects</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># initialize an array of input centroids for the current frame</span></span><br><span class="line">		inputCentroids = np.zeros((len(rects), <span class="hljs-number">2</span>), dtype=<span class="hljs-string">"int"</span>)</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># loop over the bounding box rectangles</span></span><br><span class="line">		<span class="hljs-keyword">for</span> (i, (startX, startY, endX, endY)) <span class="hljs-keyword">in</span> enumerate(rects):</span><br><span class="line">			<span class="hljs-comment"># use the bounding box coordinates to derive the centroid</span></span><br><span class="line">			cX = int((startX + endX) / <span class="hljs-number">2.0</span>)</span><br><span class="line">			cY = int((startY + endY) / <span class="hljs-number">2.0</span>)</span><br><span class="line">			inputCentroids[i] = (cX, cY)</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># if we are currently not tracking any objects take the input</span></span><br><span class="line">		<span class="hljs-comment"># centroids and register each of them</span></span><br><span class="line">		<span class="hljs-keyword">if</span> len(self.objects) == <span class="hljs-number">0</span>:</span><br><span class="line">			<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> range(<span class="hljs-number">0</span>, len(inputCentroids)):</span><br><span class="line">				self.register(inputCentroids[i])</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># otherwise, are are currently tracking objects so we need to</span></span><br><span class="line">		<span class="hljs-comment"># try to match the input centroids to existing object</span></span><br><span class="line">		<span class="hljs-comment"># centroids</span></span><br><span class="line">		<span class="hljs-keyword">else</span>:</span><br><span class="line">			<span class="hljs-comment"># grab the set of object IDs and corresponding centroids</span></span><br><span class="line">			objectIDs = list(self.objects.keys())</span><br><span class="line">			objectCentroids = list(self.objects.values())</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># compute the distance between each pair of object</span></span><br><span class="line">			<span class="hljs-comment"># centroids and input centroids, respectively -- our</span></span><br><span class="line">			<span class="hljs-comment"># goal will be to match an input centroid to an existing</span></span><br><span class="line">			<span class="hljs-comment"># object centroid</span></span><br><span class="line">			D = dist.cdist(np.array(objectCentroids), inputCentroids)</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># in order to perform this matching we must (1) find the</span></span><br><span class="line">			<span class="hljs-comment"># smallest value in each row and then (2) sort the row</span></span><br><span class="line">			<span class="hljs-comment"># indexes based on their minimum values so that the row</span></span><br><span class="line">			<span class="hljs-comment"># with the smallest value as at the *front* of the index</span></span><br><span class="line">			<span class="hljs-comment"># list</span></span><br><span class="line">			rows = D.min(axis=<span class="hljs-number">1</span>).argsort()</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># next, we perform a similar process on the columns by</span></span><br><span class="line">			<span class="hljs-comment"># finding the smallest value in each column and then</span></span><br><span class="line">			<span class="hljs-comment"># sorting using the previously computed row index list</span></span><br><span class="line">			cols = D.argmin(axis=<span class="hljs-number">1</span>)[rows]</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># in order to determine if we need to update, register,</span></span><br><span class="line">			<span class="hljs-comment"># or deregister an object we need to keep track of which</span></span><br><span class="line">			<span class="hljs-comment"># of the rows and column indexes we have already examined</span></span><br><span class="line">			usedRows = set()</span><br><span class="line">			usedCols = set()</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># loop over the combination of the (row, column) index</span></span><br><span class="line">			<span class="hljs-comment"># tuples</span></span><br><span class="line">			<span class="hljs-keyword">for</span> (row, col) <span class="hljs-keyword">in</span> zip(rows, cols):</span><br><span class="line">				<span class="hljs-comment"># if we have already examined either the row or</span></span><br><span class="line">				<span class="hljs-comment"># column value before, ignore it</span></span><br><span class="line">				<span class="hljs-keyword">if</span> row <span class="hljs-keyword">in</span> usedRows <span class="hljs-keyword">or</span> col <span class="hljs-keyword">in</span> usedCols:</span><br><span class="line">					<span class="hljs-keyword">continue</span></span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># if the distance between centroids is greater than</span></span><br><span class="line">				<span class="hljs-comment"># the maximum distance, do not associate the two</span></span><br><span class="line">				<span class="hljs-comment"># centroids to the same object</span></span><br><span class="line">				<span class="hljs-keyword">if</span> D[row, col] &gt; self.maxDistance:</span><br><span class="line">					<span class="hljs-keyword">continue</span></span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># otherwise, grab the object ID for the current row,</span></span><br><span class="line">				<span class="hljs-comment"># set its new centroid, and reset the disappeared</span></span><br><span class="line">				<span class="hljs-comment"># counter</span></span><br><span class="line">				objectID = objectIDs[row]</span><br><span class="line">				self.objects[objectID] = inputCentroids[col]</span><br><span class="line">				self.disappeared[objectID] = <span class="hljs-number">0</span></span><br><span class="line"></span><br><span class="line">				<span class="hljs-comment"># indicate that we have examined each of the row and</span></span><br><span class="line">				<span class="hljs-comment"># column indexes, respectively</span></span><br><span class="line">				usedRows.add(row)</span><br><span class="line">				usedCols.add(col)</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># compute both the row and column index we have NOT yet</span></span><br><span class="line">			<span class="hljs-comment"># examined</span></span><br><span class="line">			unusedRows = set(range(<span class="hljs-number">0</span>, D.shape[<span class="hljs-number">0</span>])).difference(usedRows)</span><br><span class="line">			unusedCols = set(range(<span class="hljs-number">0</span>, D.shape[<span class="hljs-number">1</span>])).difference(usedCols)</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># in the event that the number of object centroids is</span></span><br><span class="line">			<span class="hljs-comment"># equal or greater than the number of input centroids</span></span><br><span class="line">			<span class="hljs-comment"># we need to check and see if some of these objects have</span></span><br><span class="line">			<span class="hljs-comment"># potentially disappeared</span></span><br><span class="line">			<span class="hljs-keyword">if</span> D.shape[<span class="hljs-number">0</span>] &gt;= D.shape[<span class="hljs-number">1</span>]:</span><br><span class="line">				<span class="hljs-comment"># loop over the unused row indexes</span></span><br><span class="line">				<span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> unusedRows:</span><br><span class="line">					<span class="hljs-comment"># grab the object ID for the corresponding row</span></span><br><span class="line">					<span class="hljs-comment"># index and increment the disappeared counter</span></span><br><span class="line">					objectID = objectIDs[row]</span><br><span class="line">					self.disappeared[objectID] += <span class="hljs-number">1</span></span><br><span class="line"></span><br><span class="line">					<span class="hljs-comment"># check to see if the number of consecutive</span></span><br><span class="line">					<span class="hljs-comment"># frames the object has been marked "disappeared"</span></span><br><span class="line">					<span class="hljs-comment"># for warrants deregistering the object</span></span><br><span class="line">					<span class="hljs-keyword">if</span> self.disappeared[objectID] &gt; self.maxDisappeared:</span><br><span class="line">						self.deregister(objectID)</span><br><span class="line"></span><br><span class="line">			<span class="hljs-comment"># otherwise, if the number of input centroids is greater</span></span><br><span class="line">			<span class="hljs-comment"># than the number of existing object centroids we need to</span></span><br><span class="line">			<span class="hljs-comment"># register each new input centroid as a trackable object</span></span><br><span class="line">			<span class="hljs-keyword">else</span>:</span><br><span class="line">				<span class="hljs-keyword">for</span> col <span class="hljs-keyword">in</span> unusedCols:</span><br><span class="line">					self.register(inputCentroids[col])</span><br><span class="line"></span><br><span class="line">		<span class="hljs-comment"># return the set of trackable objects</span></span><br><span class="line">		<span class="hljs-keyword">return</span> self.objects</span><br></pre></td></tr></table></figure>
+
+<p>需要源码扫描下方二维码公众号内回复。</p>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/Machine-Learning/">Machine Learning</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        <div class="social-share"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css">
+<script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script>
+        
+
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="menu-label has-text-centered">Like this article? Support the author with</h3>
+        <div class="buttons is-centered">
+            
+                
+<a class="button is-info donate">
+    <span class="icon is-small">
+        <i class="fab fa-alipay"></i>
+    </span>
+    <span>Alipay</span>
+    <div class="qrcode"><img src="https://s2.ax1x.com/2019/09/06/nKMbvV.png" alt="Alipay"></div>
+</a>
+
+                
+                
+<a class="button is-success donate">
+    <span class="icon is-small">
+        <i class="fab fa-weixin"></i>
+    </span>
+    <span>Wechat</span>
+    <div class="qrcode"><img src="https://i.loli.net/2019/09/06/wDdYqNGRhtrJ7bA.jpg" alt="Wechat"></div>
+</a>
+
+                
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2020/01/08/Ubuntu18修改apt源/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item"></span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2019/12/05/hello-world/">
+                <span class="level-item">Hello World</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">Comments</h3>
+        
+<div id="valine-thread" class="content"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script>
+    new Valine({
+        el: '#valine-thread' ,
+        notify: false,
+        verify: false,
+        app_id: 'sEt6JNeb1X0NTwKS3y7ag3s6-gzGzoHsz',
+        app_key: 'XUNwePuSRGrQRUKpOTnwAnMP',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!'
+    });
+</script>
+
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                        <img class="image is-128x128 has-mb-6" src="https://s2.ax1x.com/2019/09/06/nKBNiq.jpg" alt="金大大">
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        金大大
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        程序猿 摄影师 爱健身 高颜值 都假的
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Shenzhen China</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Posts
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        12
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Categories
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Tags
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        2
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/Json0926" target="_blank">
+                Follow</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Github" href="https://github.com/Json0926">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Facebook" href="https://facebook.com">
+                
+                <i class="fab fa-facebook"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Twitter" href="https://twitter.com">
+                
+                <i class="fab fa-twitter"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Weibo" href="https://weibo.com">
+                
+                <i class="fab fa-Weibo"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="RSS" href="/">
+                
+                <i class="fas fa-rss"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+
+    
+        
+    
+        
+
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Links
+        </h3>
+        <ul class="menu-list">
+        
+            <li>
+                <a class="level is-mobile" href="https://hexo.io" target="_blank">
+                    <span class="level-left">
+                        <span class="level-item">Hexo</span>
+                    </span>
+                    <span class="level-right">
+                        <span class="level-item tag">hexo.io</span>
+                    </span>
+                </a>
+            </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Categories
+            </h3>
+            <ul class="menu-list">
+            
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Tag Cloud
+        </h3>
+        <a href="/tags/Machine-Learning/" style="font-size: 20px;">Machine Learning</a> <a href="/tags/Travel/" style="font-size: 10px;">Travel</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen is-sticky">
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Recent
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-09T06:53:06.514Z">2020-01-09</time></div>
+                    <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/01/08/Ubuntu18修改apt源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-08T02:24:37.858Z">2020-01-08</time></div>
+                    <a href="/2020/01/08/Ubuntu18修改apt源/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/10/OpenCV实现目标跟踪/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="OpenCV实现目标跟踪">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-09T16:00:00.000Z">2019-12-10</time></div>
+                    <a href="/2019/12/10/OpenCV实现目标跟踪/" class="title has-link-black-ter is-size-6 has-text-weight-normal">OpenCV实现目标跟踪</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/05/hello-world/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Hello World">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-05T06:51:53.000Z">2019-12-05</time></div>
+                    <a href="/2019/12/05/hello-world/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Hello World</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/04/图像识别工程大概步骤/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="图像识别工程步骤">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-04T06:28:57.000Z">2019-12-04</time></div>
+                    <a href="/2019/12/04/图像识别工程大概步骤/" class="title has-link-black-ter is-size-6 has-text-weight-normal">图像识别工程步骤</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Archives
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">January 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/12/">
+                <span class="level-start">
+                    <span class="level-item">December 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/10/">
+                <span class="level-start">
+                    <span class="level-item">October 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Tags
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Machine-Learning/">
+                        <span class="tag">Machine Learning</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Travel/">
+                        <span class="tag">Travel</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Recent
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-09T06:53:06.514Z">2020-01-09</time></div>
+                    <a href="/2020/01/09/Ubuntu18-安装-NVIDIA-driver/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2020/01/08/Ubuntu18修改apt源/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-08T02:24:37.858Z">2020-01-08</time></div>
+                    <a href="/2020/01/08/Ubuntu18修改apt源/" class="title has-link-black-ter is-size-6 has-text-weight-normal"></a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/10/OpenCV实现目标跟踪/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="OpenCV实现目标跟踪">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-09T16:00:00.000Z">2019-12-10</time></div>
+                    <a href="/2019/12/10/OpenCV实现目标跟踪/" class="title has-link-black-ter is-size-6 has-text-weight-normal">OpenCV实现目标跟踪</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/05/hello-world/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Hello World">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-05T06:51:53.000Z">2019-12-05</time></div>
+                    <a href="/2019/12/05/hello-world/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Hello World</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/12/04/图像识别工程大概步骤/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="图像识别工程步骤">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-12-04T06:28:57.000Z">2019-12-04</time></div>
+                    <a href="/2019/12/04/图像识别工程大概步骤/" class="title has-link-black-ter is-size-6 has-text-weight-normal">图像识别工程步骤</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Archives
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">January 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/12/">
+                <span class="level-start">
+                    <span class="level-item">December 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">5</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/10/">
+                <span class="level-start">
+                    <span class="level-item">October 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Tags
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Machine-Learning/">
+                        <span class="tag">Machine Learning</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/Travel/">
+                        <span class="tag">Travel</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    
+<footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="https://s2.ax1x.com/2019/09/06/nKmgwd.jpg" alt="OpenCV实现目标跟踪" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2020 Js&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                
+                <br>
+                
+                </p>
+            </div>
+            <div class="center">
+              <script pjax async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+              <span id="busuanzi_container_page_pv">
+                    本站总访问量<span id="busuanzi_value_site_pv" style="display"></span>次
+              </span>
+              <span id="busuanzi_container_page_uv">
+                    本站访客数<span id="busuanzi_value_site_uv" style="display"></span>人次
+              </span>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("en");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+    
+    
+
+<a id="back-to-top" title="Back to Top" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="Type something..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>
